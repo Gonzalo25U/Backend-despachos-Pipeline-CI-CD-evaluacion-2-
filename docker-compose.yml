@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+
+  # ── Backend Despachos ────────────────────────────────────────────────────────
+  backend-despachos:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gonzalo25u/backend-despachos:latest
+    container_name: backend-despachos
+    restart: unless-stopped
+    environment:
+      # IP privada de EC2 "data" donde corre MySQL
+      DB_ENDPOINT: ${DB_ENDPOINT:-10.0.150.130}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:8080"
+    volumes:
+      # Named volume para logs persistentes del backend
+      - despachos_logs:/app/logs
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  # Named volume para persistencia de logs.
+  # Se prefiere named volume sobre bind mount por portabilidad y porque
+  # Docker gestiona el ciclo de vida sin depender de rutas del host.
+  despachos_logs:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
