@@ -65,16 +65,25 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
+      - name: Crear directorio en EC2 app
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o ProxyJump=${{ secrets.EC2_USER }}@${{ secrets.EC2_WEB_HOST }} \
+              ${{ secrets.EC2_USER }}@${{ secrets.EC2_APP_HOST }} \
+              "mkdir -p /home/${{ secrets.EC2_USER }}/backend-despachos"
+
       - name: Copiar docker-compose a EC2 app vía jump host
         run: |
-          scp -o ProxyJump=${{ secrets.EC2_USER }}@${{ secrets.EC2_WEB_HOST }} \
-            ./Springboot-API-REST-DESPACHO/docker-compose.yml \
+          scp -o StrictHostKeyChecking=no \
+              -o ProxyJump=${{ secrets.EC2_USER }}@${{ secrets.EC2_WEB_HOST }} \
+              ./Springboot-API-REST-DESPACHO/docker-compose.yml \
               ${{ secrets.EC2_USER }}@${{ secrets.EC2_APP_HOST }}:/home/${{ secrets.EC2_USER }}/backend-despachos/
 
       # Paso 3: Conectarse a EC2 "app" vía jump host y ejecutar el deploy
       - name: Deploy en EC2 app
         run: |
-          ssh -o ProxyJump=${{ secrets.EC2_USER }}@${{ secrets.EC2_WEB_HOST }} \
+          ssh -o StrictHostKeyChecking=no \
+              -o ProxyJump=${{ secrets.EC2_USER }}@${{ secrets.EC2_WEB_HOST }} \
               ${{ secrets.EC2_USER }}@${{ secrets.EC2_APP_HOST }} << 'ENDSSH'
 
             cd /home/${{ secrets.EC2_USER }}/backend-despachos
