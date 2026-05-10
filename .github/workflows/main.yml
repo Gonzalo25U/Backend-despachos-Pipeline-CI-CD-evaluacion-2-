@@ -68,7 +68,7 @@ jobs:
       - name: Copiar docker-compose a EC2 app vía jump host
         run: |
           scp -o ProxyJump=${{ secrets.EC2_USER }}@${{ secrets.EC2_WEB_HOST }} \
-              docker-compose.yml \
+            ./Springboot-API-REST-DESPACHO/docker-compose.yml \
               ${{ secrets.EC2_USER }}@${{ secrets.EC2_APP_HOST }}:/home/${{ secrets.EC2_USER }}/backend-despachos/
 
       # Paso 3: Conectarse a EC2 "app" vía jump host y ejecutar el deploy
